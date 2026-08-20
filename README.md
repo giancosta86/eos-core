@@ -1,6 +1,8 @@
-# Eos-core
+# eos-core
 
 _Type-checked, dependency-free utility library for modern Python_
+
+[![PyPI Version](https://img.shields.io/pypi/v/info.gianlucacosta.eos-core?style=for-the-badge&logo=python&logoColor=white&color=forestgreen)](https://pypi.org/project/info.gianlucacosta.eos-core/)
 
 ## Introduction
 
