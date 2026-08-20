@@ -2,7 +2,7 @@ from operator import add
 
 from pytest import raises
 
-from info.gianlucacosta.eos.core.multiprocessing.pool import InThreadPool
+from .pool import InThreadPool
 
 
 def my_diff(x: int, y: int):

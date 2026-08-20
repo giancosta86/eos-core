@@ -1,22 +1,18 @@
-from typing import Any, Callable, TypeVar, Union
+from collections.abc import Callable
+from typing import Any
 
-AnyCallable = Callable[..., Any]
+type AnyCallable = Callable[..., Any]
 
-T = TypeVar("T")
+type Consumer[TInput] = Callable[[TInput], None]
+type Producer[TOutput] = Callable[[], TOutput]
+type Lender[TOutput] = Callable[[], TOutput]
 
-TInput = TypeVar("TInput")
-TOutput = TypeVar("TOutput")
+type Unit = Callable[[], None]
+type TriggerListener = Callable[[], None]
 
-Consumer = Callable[[TInput], None]
-Producer = Callable[[], TOutput]
-Lender = Callable[[], TOutput]
+type Result[TOutput] = TOutput | Exception
 
-Unit = Callable[[], None]
-TriggerListener = Callable[[], None]
+type Mapper[TInput, TOutput] = Callable[[TInput], TOutput]
+type Predicate[TInput] = Mapper[TInput, bool]
 
-Result = Union[TOutput, Exception]
-
-Mapper = Callable[[TInput], TOutput]
-Predicate = Mapper[TInput, bool]
-
-ContinuationProvider = Producer[bool]
+type ContinuationProvider = Producer[bool]

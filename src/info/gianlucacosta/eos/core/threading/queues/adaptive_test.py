@@ -1,19 +1,20 @@
+from collections.abc import Iterable
 from functools import wraps
 from queue import Queue
 from threading import Thread
 from time import sleep
-from typing import Iterable
 
 from pytest import raises
 
-from info.gianlucacosta.eos.core.functional import AnyCallable
-from info.gianlucacosta.eos.core.logic.ranges import InclusiveRange
-from info.gianlucacosta.eos.core.threading.queues.adaptive import (
-    create_adaptive_queue_reader,
-    create_adaptive_queue_writer,
+from ...functional import AnyCallable
+from ...logic.ranges import InclusiveRange
+from ..queues_test import (
+    FAST_AGENT_CONFIGURATION,
+    SLOW_AGENT_CONFIGURATION,
+    AgentConfigurationForTesting,
 )
-
-from . import FAST_AGENT_CONFIGURATION, SLOW_AGENT_CONFIGURATION, AgentConfigurationForTesting
+from . import QueueWriter
+from .adaptive import create_adaptive_queue_reader, create_adaptive_queue_writer
 
 
 def agent_scenario(
@@ -24,7 +25,7 @@ def agent_scenario(
 ):
     def decorator(test_function: AnyCallable) -> AnyCallable:
         @wraps(test_function)
-        def wrapper():
+        def wrapper() -> None:
             result: list[int] = []
 
             queue = Queue[int](maxsize=queue_max_size)
@@ -34,7 +35,7 @@ def agent_scenario(
                     sleep(writer_configuration.operation_sleep_seconds)
                     yield item
 
-            write_items_to_queue = create_adaptive_queue_writer(
+            write_items_to_queue: QueueWriter[int] = create_adaptive_queue_writer(
                 timeout_seconds_range=writer_configuration.timeout_seconds_range,
                 timeout_factor=writer_configuration.timeout_factor,
             )
@@ -50,10 +51,14 @@ def agent_scenario(
             )
 
             writing_thread = Thread(
-                target=lambda: write_items_to_queue(queue, lambda: True, item_producer())
+                target=lambda: write_items_to_queue(
+                    queue, lambda: True, item_producer()
+                )
             )
             reading_thread = Thread(
-                target=lambda: read_items_from_queue(queue, lambda: len(result) < len(source))
+                target=lambda: read_items_from_queue(
+                    queue, lambda: len(result) < len(source)
+                )
             )
 
             writing_thread.start()
@@ -115,31 +120,33 @@ def test_create_writer_with_negative_timeout_factor():
 
 def test_create_reader_with_zero_point_nine_timeout_factor():
     with raises(ValueError) as ex:
-        create_adaptive_queue_reader(lambda _: None, InclusiveRange(7, 90), timeout_factor=0.9)
+        create_adaptive_queue_reader(
+            lambda _: None, InclusiveRange(7, 90), timeout_factor=0.9
+        )
 
     assert ex.value.args == (0.9,)
 
 
 def test_create_reader_with_negative_timeout_factor():
     with raises(ValueError) as ex:
-        create_adaptive_queue_reader(lambda _: None, InclusiveRange(7, 90), timeout_factor=-9)
+        create_adaptive_queue_reader(
+            lambda _: None, InclusiveRange(7, 90), timeout_factor=-9
+        )
 
     assert ex.value.args == (-9,)
 
 
-def test_interrupted_writer():
+def test_interrupted_writer() -> None:
     result: list[int] = []
-
-    source = range(90)
 
     queue = Queue[int](maxsize=3)
 
     def item_producer() -> Iterable[int]:
-        for item in source:
+        for item in range(90):
             sleep(FAST_AGENT_CONFIGURATION.operation_sleep_seconds)
             yield item
 
-    write_items_to_queue = create_adaptive_queue_writer(
+    write_items_to_queue: QueueWriter[int] = create_adaptive_queue_writer(
         timeout_seconds_range=FAST_AGENT_CONFIGURATION.timeout_seconds_range,
         timeout_factor=FAST_AGENT_CONFIGURATION.timeout_factor,
     )
@@ -150,7 +157,9 @@ def test_interrupted_writer():
     def write_to_result(item: int) -> None:
         nonlocal canceled
 
-        result.append(item)
+        if not canceled:
+            result.append(item)
+
         if item == last_expected_item:
             canceled = True
 
@@ -163,9 +172,13 @@ def test_interrupted_writer():
     )
 
     writing_thread = Thread(
-        target=lambda: write_items_to_queue(queue, lambda: not canceled, item_producer())
+        target=lambda: write_items_to_queue(
+            queue, lambda: not canceled, item_producer()
+        )
     )
-    reading_thread = Thread(target=lambda: read_items_from_queue(queue, lambda: not canceled))
+    reading_thread = Thread(
+        target=lambda: read_items_from_queue(queue, lambda: not canceled)
+    )
 
     writing_thread.start()
     reading_thread.start()
@@ -173,7 +186,11 @@ def test_interrupted_writer():
     writing_thread.join()
     reading_thread.join()
 
-    assert result == list(range(last_expected_item + 1))
+    expected_list = list(range(last_expected_item + 1))
+
+    print("🤔RESULT IS: " + str(result))
+    print("🎯EXPECTED LIST IS: " + str(expected_list))
+    assert result == expected_list
 
 
 def test_interrupted_writer_without_reader():
@@ -186,7 +203,7 @@ def test_interrupted_writer_without_reader():
             sleep(FAST_AGENT_CONFIGURATION.operation_sleep_seconds)
             yield item
 
-    write_items_to_queue = create_adaptive_queue_writer(
+    write_items_to_queue: QueueWriter[int] = create_adaptive_queue_writer(
         timeout_seconds_range=FAST_AGENT_CONFIGURATION.timeout_seconds_range,
         timeout_factor=FAST_AGENT_CONFIGURATION.timeout_factor,
     )

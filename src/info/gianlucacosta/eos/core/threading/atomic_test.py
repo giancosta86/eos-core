@@ -1,8 +1,8 @@
 from functools import wraps
 from threading import Thread
 
-from info.gianlucacosta.eos.core.functional import Consumer, Producer
-from info.gianlucacosta.eos.core.threading.atomic import Atomic
+from ..functional import Consumer, Producer
+from .atomic import Atomic
 
 
 class TestAtomicWithOneThread:
@@ -42,7 +42,8 @@ def multithread_test(expected_final_value: ExpectedResult, thread_count: int = 5
             atomic_consumer = test_function()
 
             threads = [
-                Thread(target=lambda: atomic_consumer(counter)) for _ in range(thread_count)
+                Thread(target=lambda: atomic_consumer(counter))
+                for _ in range(thread_count)
             ]
 
             for thread in threads:

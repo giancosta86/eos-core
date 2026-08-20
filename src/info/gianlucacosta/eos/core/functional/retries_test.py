@@ -1,6 +1,6 @@
 from pytest import mark, raises
 
-from info.gianlucacosta.eos.core.functional.retries import call_with_retries
+from .retries import call_with_retries
 
 
 class RetryTestException(Exception):
@@ -72,7 +72,7 @@ class TestRunWithRetries:
             if provider_call_count == 3:
                 return 90
 
-            raise Exception()
+            raise RetryTestException()
 
         result = call_with_retries(int_provider, max_attempts=3, timeout_seconds=0)
         assert result == 90

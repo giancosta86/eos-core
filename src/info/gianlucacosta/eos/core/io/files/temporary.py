@@ -3,7 +3,7 @@ from os import unlink
 from os.path import join
 from shutil import rmtree
 from tempfile import gettempdir
-from typing import Any, Type, TypeVar
+from typing import Self
 from uuid import uuid4
 
 from ...functional import Producer
@@ -31,11 +31,9 @@ class TemporaryPath(str):
     try_to_remove() in a finally block - there will be no automatic deletion.
     """
 
-    TSelf = TypeVar("TSelf")
-
     _logger = getLogger("TemporaryPath")
 
-    def __new__(cls: Type[TSelf], basename_producer: Producer[str]) -> TSelf:
+    def __new__(cls, basename_producer: Producer[str]) -> Self:
         """
         Creates the temporary path.
 
@@ -44,10 +42,10 @@ class TemporaryPath(str):
         """
         return str.__new__(cls, join(gettempdir(), basename_producer()))
 
-    def __enter__(self: TSelf) -> TSelf:
+    def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, *_: Any) -> None:
+    def __exit__(self, *_: object) -> None:
         self.try_to_remove()
 
     def try_to_remove(self) -> None:
@@ -82,7 +80,9 @@ class TemporaryPath(str):
             return
         except OSError:
             if __debug__:
-                self._logger.info("Could not delete the temporary name as a directory tree")
+                self._logger.info(
+                    "Could not delete the temporary name as a directory tree"
+                )
 
 
 class Uuid4TemporaryPath(TemporaryPath):
@@ -90,7 +90,5 @@ class Uuid4TemporaryPath(TemporaryPath):
     Temporary path whose basename is a UUID.
     """
 
-    def __new__(
-        cls: Type[TemporaryPath.TSelf], extension_including_dot: str = ""
-    ) -> TemporaryPath.TSelf:
+    def __new__(cls, extension_including_dot: str = "") -> Self:
         return TemporaryPath.__new__(cls, lambda: f"{uuid4()}{extension_including_dot}")

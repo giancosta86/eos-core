@@ -2,7 +2,7 @@ import re
 from os import makedirs
 from os.path import basename, exists, isabs, join
 
-from info.gianlucacosta.eos.core.io.files.temporary import Uuid4TemporaryPath
+from .temporary import Uuid4TemporaryPath
 
 
 class TestUuid4TemporaryPath:
@@ -13,7 +13,9 @@ class TestUuid4TemporaryPath:
     def test_basename(self):
         path = Uuid4TemporaryPath()
 
-        uuid_pattern = re.compile(r"[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}")
+        uuid_pattern = re.compile(
+            r"[a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12}"
+        )
 
         assert uuid_pattern.match(basename(path))
 

@@ -7,5 +7,8 @@ def reconfigure_output_and_error(encoding: str = "utf-8") -> None:
 
     It is especially useful when logging UTF-8 text to stdout/stderr.
     """
-    getattr(stdout, "reconfigure")(encoding=encoding)
-    getattr(stderr, "reconfigure")(encoding=encoding)
+    if hasattr(stdout, "reconfigure"):
+        stdout.reconfigure(encoding=encoding)
+
+    if hasattr(stderr, "reconfigure"):
+        stderr.reconfigure(encoding=encoding)

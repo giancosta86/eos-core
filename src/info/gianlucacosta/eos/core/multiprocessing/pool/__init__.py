@@ -1,9 +1,8 @@
+from collections.abc import Iterable
 from multiprocessing.pool import Pool
-from typing import Any, Iterable, Optional, TypeVar, Union
+from typing import Any, Self
 
 from ...functional import AnyCallable, Consumer, Producer
-
-T = TypeVar("T")
 
 
 class InThreadPool:
@@ -18,27 +17,27 @@ class InThreadPool:
     functions, actually letting the client decide what kind of pool they need.
     """
 
-    def __enter__(self) -> "InThreadPool":
+    def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, *_: Any) -> None:
+    def __exit__(self, *_: object) -> None:
         pass
 
     def apply(
         self,
         func: AnyCallable,
-        args: Optional[Iterable[Any]] = None,
-        kwds: Optional[dict[Any, Any]] = None,
-    ) -> T:
+        args: Iterable[Any] | None = None,
+        kwds: dict[Any, Any] | None = None,
+    ) -> Any:
         return func(*(args if args is not None else []), **(kwds if kwds is not None else {}))
 
     def apply_async(
         self,
         func: AnyCallable,
-        args: Optional[Iterable[Any]] = None,
-        kwds: Optional[dict[Any, Any]] = None,
-        callback: Optional[Consumer[T]] = None,
-        error_callback: Optional[Consumer[Exception]] = None,
+        args: Iterable[Any] | None = None,
+        kwds: dict[Any, Any] | None = None,
+        callback: Consumer[Any] | None = None,
+        error_callback: Consumer[Exception] | None = None,
     ) -> None:
         try:
             result = func(
@@ -63,5 +62,5 @@ class InThreadPool:
         pass
 
 
-AnyProcessPool = Union[Pool, InThreadPool]
+AnyProcessPool = Pool | InThreadPool
 ProcessPoolFactory = Producer[AnyProcessPool]

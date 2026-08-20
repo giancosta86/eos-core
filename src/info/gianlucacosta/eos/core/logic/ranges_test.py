@@ -1,6 +1,6 @@
 from pytest import raises
 
-from info.gianlucacosta.eos.core.logic.ranges import InclusiveRange, RangedCounter
+from .ranges import InclusiveRange, RangedCounter
 
 
 class TestRange:

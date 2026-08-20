@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from threading import Thread
-from typing import Any, Optional
+from typing import Any
 
 
 class CancelableThread(Thread, ABC):
@@ -58,5 +58,5 @@ class CancelableThreadHandle:
     def request_cancel(self) -> None:
         self._thread.request_cancel()
 
-    def join(self, timeout: Optional[float] = None) -> None:
+    def join(self, timeout: float | None = None) -> None:
         self._thread.join(timeout)

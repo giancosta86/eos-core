@@ -1,9 +1,6 @@
-from typing import Callable, Optional
+from collections.abc import Callable
 
-from info.gianlucacosta.eos.core.threading.cancelable import (
-    CancelableThread,
-    CancelableThreadHandle,
-)
+from .cancelable import CancelableThread, CancelableThreadHandle
 
 
 class CancelableTestThread(CancelableThread):
@@ -54,10 +51,10 @@ def test_canceling_via_self():
     assert not thread.never_canceled
 
 
-def test_canceling_via_handle():
+def test_canceling_via_handle() -> None:
     counter = 0
 
-    thread_handle: Optional[CancelableThreadHandle] = None
+    thread_handle: CancelableThreadHandle | None = None
 
     def body(_: CancelableThread):
         nonlocal counter

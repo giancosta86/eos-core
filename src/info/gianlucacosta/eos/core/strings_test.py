@@ -1,4 +1,4 @@
-from info.gianlucacosta.eos.core.strings import strip_to_none
+from .strings import strip_to_none
 
 
 class TestStripToNone:

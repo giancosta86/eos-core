@@ -1,7 +1,4 @@
-from typing import Optional
-
-
-def strip_to_none(source: Optional[str]) -> Optional[str]:
+def strip_to_none(source: str | None) -> str | None:
     """
     Returns the given string stripped, but returns None if the source was None or the result
     would be empty.
