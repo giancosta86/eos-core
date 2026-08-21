@@ -1,9 +1,6 @@
-from typing import Optional
-
-
 class CallbackExceptionCapturer:
     """
-    Instances of this class can be passed to functions expecting (Optional[Exception]) -> None
+    Instances of this class can be passed to functions expecting (Exception|None) -> None
     callbacks.
 
     In particular, the optional exception is stored into a field - which can be inspected later
@@ -13,11 +10,11 @@ class CallbackExceptionCapturer:
     """
 
     def __init__(self) -> None:
-        self._exception: Optional[Exception] = None
+        self._exception: Exception | None = None
 
-    def __call__(self, exception: Optional[Exception]) -> None:
+    def __call__(self, exception: Exception | None) -> None:
         self._exception = exception
 
     @property
-    def exception(self) -> Optional[Exception]:
+    def exception(self) -> Exception | None:
         return self._exception

@@ -1,5 +1,6 @@
+from collections.abc import Callable
 from contextlib import closing
-from typing import Any, Callable, Iterable, TypeVar
+from typing import Any
 
 from ...db.sqlite import ConnectionLender
 from ...functional import Mapper
@@ -10,12 +11,11 @@ from ...io.serializing.delayed import (
 )
 from ...reflection import get_single_parameter
 
-T = TypeVar("T")
-DbRow = Iterable[Any]
-ItemToDbRowMapper = Mapper[T, DbRow]
+type DbRow = list[Any]
+type ItemToDbRowMapper[T] = Mapper[T, DbRow]
 
 
-class ItemToRowSerializer(MappingBufferedSerializer[T, DbRow]):
+class ItemToRowSerializer[T](MappingBufferedSerializer[T, DbRow]):
     """
     Buffered serializer that maps an object to a db row - a tuple - via the given mapper.
 
@@ -67,7 +67,7 @@ class BufferedDbSerializer(DelayedSerializer[Any]):
 
     def __init__(self, connection_lender: ConnectionLender) -> None:
         self._connection_lender = connection_lender
-        self._composite_serializer = CompositeDelayedSerializer()
+        self._composite_serializer = CompositeDelayedSerializer[Any]()
 
     def request_serialize(self, item: Any) -> None:
         self._composite_serializer.request_serialize(item)
@@ -75,7 +75,7 @@ class BufferedDbSerializer(DelayedSerializer[Any]):
     def flush(self) -> None:
         self._composite_serializer.flush()
 
-    def register(
+    def register[T](
         self, insertion_statement: str, max_buffer_len: int = 3000
     ) -> Callable[[ItemToDbRowMapper[T]], ItemToDbRowMapper[T]]:
         """
@@ -110,7 +110,9 @@ class BufferedDbSerializer(DelayedSerializer[Any]):
                     "The mapper does not explicitly declare a type annotation for its parameter"
                 )
 
-            self._composite_serializer.add_serializer(item_type=item_type, serializer=serializer)
+            self._composite_serializer.add_serializer(
+                item_type=item_type, serializer=serializer
+            )
 
             return item_mapper
 

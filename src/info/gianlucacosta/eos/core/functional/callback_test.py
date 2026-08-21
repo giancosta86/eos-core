@@ -1,10 +1,8 @@
-from typing import Optional
-
-from info.gianlucacosta.eos.core.functional import Consumer
-from info.gianlucacosta.eos.core.functional.callback import CallbackExceptionCapturer
+from . import Consumer
+from .callback import CallbackExceptionCapturer
 
 
-def send_to_function(target: Consumer[Optional[Exception]], to_send: Optional[Exception]):
+def send_to_function(target: Consumer[Exception | None], to_send: Exception | None):
     target(to_send)
 
 

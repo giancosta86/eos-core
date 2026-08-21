@@ -1,8 +1,8 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from os import stat, utime
 
-from info.gianlucacosta.eos.core.io.files import get_modification_datetime, get_size_in_mb
-from info.gianlucacosta.eos.core.io.files.temporary import Uuid4TemporaryPath
+from .files import get_modification_datetime, get_size_in_mb
+from .files.temporary import Uuid4TemporaryPath
 
 
 class TestGetModificationTime:
@@ -17,7 +17,7 @@ class TestGetModificationTime:
 
             file_stat = stat(temp_path)
 
-            expected_modification_time = datetime(1986, 4, 29, 3, 50, 7, 5)
+            expected_modification_time = datetime(1986, 4, 29, 3, 50, 7, 5, tzinfo=UTC)
             utime(
                 temp_path,
                 times=(

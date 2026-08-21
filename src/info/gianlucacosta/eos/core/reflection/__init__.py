@@ -1,10 +1,9 @@
+from collections.abc import Callable
 from inspect import Parameter, signature
-from typing import Any, Callable, TypeVar
-
-T = TypeVar("T")
+from typing import Any
 
 
-def get_single_parameter(function: Callable[[T], Any]) -> Parameter:
+def get_single_parameter[T](function: Callable[[T], Any]) -> Parameter:
     """
     Returns metadata about the single parameters of a 1-arg function.
 

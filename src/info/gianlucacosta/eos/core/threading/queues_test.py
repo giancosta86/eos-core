@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from info.gianlucacosta.eos.core.logic.ranges import InclusiveRange
+from ..logic.ranges import InclusiveRange
 
 
 @dataclass

@@ -1,10 +1,9 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from os import stat
 from os.path import getmtime
-from typing import Optional, Union
 
 
-def get_size_in_mb(file_path: Union[str, int]) -> Optional[float]:
+def get_size_in_mb(file_path: str | int) -> float | None:
     """
     Returns the file of the size in MB, or None on error.
     """
@@ -15,12 +14,12 @@ def get_size_in_mb(file_path: Union[str, int]) -> Optional[float]:
         return None
 
 
-def get_modification_datetime(file: Union[str, int]) -> Optional[datetime]:
+def get_modification_datetime(file: str | int) -> datetime | None:
     """
     Returns the modification datetime of the given file, or None on error.
     """
     try:
         timestamp = getmtime(file)
-        return datetime.fromtimestamp(timestamp)
+        return datetime.fromtimestamp(timestamp, tz=UTC)
     except OSError:
         return None

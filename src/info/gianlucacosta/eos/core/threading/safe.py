@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from logging import getLogger
 from threading import Thread
-from typing import Any, Optional
+from typing import Any
 
 
 class SafeThread(Thread, ABC):
@@ -21,11 +21,11 @@ class SafeThread(Thread, ABC):
 
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
-        self._exception: Optional[Exception] = None
+        self._exception: Exception | None = None
         self._logger = getLogger(type(self).__name__)
 
     @property
-    def exception(self) -> Optional[Exception]:
+    def exception(self) -> Exception | None:
         return self._exception
 
     def run(self) -> None:
@@ -34,7 +34,7 @@ class SafeThread(Thread, ABC):
                 self._logger.info("Just entered %s!", type(self).__name__)
 
             self._safe_run()
-        except Exception as ex:
+        except Exception as ex:  # noqa: BLE001
             self._exception = ex
 
             self._logger.error("Unhandled exception in %s: %r", type(self).__name__, ex)

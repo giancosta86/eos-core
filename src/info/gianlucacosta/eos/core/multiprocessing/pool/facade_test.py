@@ -1,11 +1,11 @@
+from collections.abc import Callable
 from time import sleep
-from typing import Callable
 
 from pytest import raises
 
-from info.gianlucacosta.eos.core.multiprocessing.pool import InThreadPool
-from info.gianlucacosta.eos.core.multiprocessing.pool.facade import ProcessPoolFacade
-from info.gianlucacosta.eos.core.threading.atomic import Atomic
+from ...threading.atomic import Atomic
+from . import InThreadPool
+from .facade import ProcessPoolFacade
 
 
 def special_sum(alpha: int, beta: int) -> int:
@@ -53,7 +53,9 @@ class MyProcessPoolFacade(ProcessPoolFacade[int]):
 class TestProcessPoolFacade:
     def test_with_common_scenario(self):
         atomic = Atomic(0)
-        with MyProcessPoolFacade(special_sum, atomic, max_pending_async_requests=2) as pool_facade:
+        with MyProcessPoolFacade(
+            special_sum, atomic, max_pending_async_requests=2
+        ) as pool_facade:
             pool_facade.send_numbers(9, 4)
             pool_facade.send_numbers(3, 8)
             pool_facade.send_numbers(5, 7)
@@ -81,6 +83,8 @@ class TestProcessPoolFacade:
         atomic = Atomic(0)
 
         with raises(ValueError) as ex:
-            MyProcessPoolFacade(special_sum_with_error, atomic, max_pending_async_requests=-5)
+            MyProcessPoolFacade(
+                special_sum_with_error, atomic, max_pending_async_requests=-5
+            )
 
         assert ex.value.args == (-5,)

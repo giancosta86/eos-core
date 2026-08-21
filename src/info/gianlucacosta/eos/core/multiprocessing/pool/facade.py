@@ -1,15 +1,14 @@
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from logging import getLogger
 from multiprocessing import cpu_count
 from threading import Semaphore
-from typing import Any, Callable, Generic, Optional, TypeVar
+from typing import Any, Self
 
 from . import ProcessPoolFactory
 
-T = TypeVar("T")
 
-
-class ProcessPoolFacade(Generic[T], ABC):
+class ProcessPoolFacade[T](ABC):
     """
     Facade to simplify and regulate the usage of a process pool.
 
@@ -35,13 +34,11 @@ class ProcessPoolFacade(Generic[T], ABC):
       of a "with" block - instead of the default terminate() call provided by Python's pools
     """
 
-    TSelf = TypeVar("TSelf")
-
     def __init__(
         self,
         pool_factory: ProcessPoolFactory,
         worker_function: Callable[..., T],
-        max_pending_async_requests: Optional[int] = None,
+        max_pending_async_requests: int | None = None,
     ):
         """
         Creates the facade - as well as the underlying pool, via the given pool_factory.
@@ -59,10 +56,10 @@ class ProcessPoolFacade(Generic[T], ABC):
         self._request_semaphore = Semaphore(max_pending_async_requests or cpu_count())
         self._logger = getLogger(type(self).__name__)
 
-    def __enter__(self: TSelf) -> TSelf:
+    def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, *_: Any) -> None:
+    def __exit__(self, *_: object) -> None:
         self.close_and_join()
 
     def close_and_join(self) -> None:

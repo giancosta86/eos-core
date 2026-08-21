@@ -1,12 +1,9 @@
 from threading import Lock
-from typing import Generic, TypeVar
 
 from ..functional import Mapper
 
-T = TypeVar("T")
 
-
-class Atomic(Generic[T]):
+class Atomic[T]:
     """
     Value that can only be accessed and changed atomically.
 

@@ -1,14 +1,11 @@
 from abc import ABC, abstractmethod
 from logging import getLogger
-from typing import Any, Generic, Type, TypeVar
+from typing import Any, Self
 
 from ...functional import Mapper
 
-T = TypeVar("T")
-TBufferedItem = TypeVar("TBufferedItem")
 
-
-class DelayedSerializer(Generic[T], ABC):
+class DelayedSerializer[T](ABC):
     """
     Abstract class ensuring that it will eventually serialize objects of the given type
     once its flush() methods gets called:
@@ -24,12 +21,10 @@ class DelayedSerializer(Generic[T], ABC):
     is provided by this class.
     """
 
-    TSelf = TypeVar("TSelf")
-
-    def __enter__(self: TSelf) -> TSelf:
+    def __enter__(self) -> Self:
         return self
 
-    def __exit__(self, *_: Any) -> None:
+    def __exit__(self, *_: object) -> None:
         self.flush()
 
     @abstractmethod
@@ -41,7 +36,7 @@ class DelayedSerializer(Generic[T], ABC):
         pass
 
 
-class MappingBufferedSerializer(Generic[T, TBufferedItem], DelayedSerializer[T]):
+class MappingBufferedSerializer[T, TBufferedItem](DelayedSerializer[T]):
     """
     Delayed serializer that, upon a serialization request:
 
@@ -50,7 +45,9 @@ class MappingBufferedSerializer(Generic[T, TBufferedItem], DelayedSerializer[T])
     2. automatically performs flush() once its internal buffer exceeds the given size
     """
 
-    def __init__(self, item_mapper: Mapper[T, TBufferedItem], max_buffer_len: int) -> None:
+    def __init__(
+        self, item_mapper: Mapper[T, TBufferedItem], max_buffer_len: int
+    ) -> None:
         self._mapper = item_mapper
         self._max_buffer_len = max_buffer_len
         self._buffer: list[TBufferedItem] = []
@@ -70,7 +67,7 @@ class MappingBufferedSerializer(Generic[T, TBufferedItem], DelayedSerializer[T])
         self._buffer = []
 
 
-class CompositeDelayedSerializer(DelayedSerializer[Any]):
+class CompositeDelayedSerializer[T](DelayedSerializer[Any]):
     """
     Delayed serializer that can serialize any object - actually delegating the serialization
     process to its internal serializers.
@@ -104,16 +101,16 @@ class CompositeDelayedSerializer(DelayedSerializer[Any]):
         for serializer in self._serializers_by_type.values():
             try:
                 serializer.flush()
-            except Exception as ex:
+            except Exception as ex:  # noqa: BLE001
                 self._logger.error(
                     "Error while flushing %s: %r",
                     type(serializer).__name__,
                     ex,
                 )
-            finally:
-                super().flush()
 
-    def add_serializer(self, item_type: Type[T], serializer: DelayedSerializer[T]) -> None:
+    def add_serializer(
+        self, item_type: type[T], serializer: DelayedSerializer[T]
+    ) -> None:
         """
         Registers an internal serializer for the given type.
 

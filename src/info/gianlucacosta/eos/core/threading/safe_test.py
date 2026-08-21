@@ -1,4 +1,4 @@
-from info.gianlucacosta.eos.core.threading.safe import SafeThread
+from .safe import SafeThread
 
 
 class MyTestException(Exception):

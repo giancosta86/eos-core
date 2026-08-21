@@ -1,18 +1,15 @@
+from collections.abc import Iterable
 from logging import getLogger
 from queue import Empty, Full, Queue
-from typing import Iterable, TypeVar
 
 from ...functional import Consumer, ContinuationProvider
 from ...logic.ranges import InclusiveRange, RangedCounter
 from . import QueueReader, QueueWriter
 
-T = TypeVar("T")
-
-
 logger = getLogger(__name__)
 
 
-def create_adaptive_queue_writer(
+def create_adaptive_queue_writer[T](
     timeout_seconds_range: InclusiveRange,
     timeout_factor: float,
 ) -> QueueWriter[T]:
@@ -85,7 +82,7 @@ def create_adaptive_queue_writer(
     return writer
 
 
-def create_adaptive_queue_reader(
+def create_adaptive_queue_reader[T](
     item_consumer: Consumer[T],
     timeout_seconds_range: InclusiveRange,
     timeout_factor: float,

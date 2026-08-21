@@ -1,15 +1,12 @@
 from logging import getLogger
 from time import sleep
-from typing import TypeVar
 
 from . import Producer
 
 logger = getLogger(__name__)
 
-T = TypeVar("T")
 
-
-def call_with_retries(producer: Producer[T], max_attempts: int, timeout_seconds: float) -> T:
+def call_with_retries[T](producer: Producer[T], max_attempts: int, timeout_seconds: float) -> T:
     """
     Tries to call the given producer at most "max_attempts" times, with a timeout in seconds
     before each retry; the execution ends as soon as the producer ends without exceptions,

@@ -4,8 +4,8 @@ from sqlite3 import Connection
 
 from pytest import raises
 
-from info.gianlucacosta.eos.core.db.sqlite import create_memory_db
-from info.gianlucacosta.eos.core.db.sqlite.serializer import BufferedDbSerializer
+from . import create_memory_db
+from .serializer import BufferedDbSerializer
 
 
 @dataclass
@@ -16,17 +16,17 @@ class Bear:
 
 def create_schema(connection: Connection) -> None:
     with closing(connection.cursor()) as cursor:
-        cursor.executescript(
-            """
+        cursor.executescript("""
         CREATE TABLE bears (
             name TEXT NOT NULL PRIMARY KEY,
             age INT NOT NULL
         )
-        """
-        )
+        """)
 
 
-def create_serializer(connection: Connection, max_buffer_len: int) -> BufferedDbSerializer:
+def create_serializer(
+    connection: Connection, max_buffer_len: int
+) -> BufferedDbSerializer:
     serializer = BufferedDbSerializer(lambda: connection)
 
     @serializer.register(
@@ -115,27 +115,23 @@ def test_registering_type_twice():
 
         serializer = BufferedDbSerializer(lambda: connection)
 
-        @serializer.register(
-            """
+        @serializer.register("""
             INSERT INTO bears
             (name, age)
             VALUES
             (?, ?)
-            """
-        )
+            """)
         def serialize_bear_once(bear: Bear):
             return (bear.name, bear.age)
 
         with raises(KeyError):
 
-            @serializer.register(
-                """
+            @serializer.register("""
                 INSERT INTO bears
                 (name, age)
                 VALUES
                 (?, ?)
-                """
-            )
+                """)
             def serialize_bear_twice(bear: Bear):
                 return (bear.name, bear.age)
 
